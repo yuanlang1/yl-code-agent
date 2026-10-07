@@ -8,7 +8,7 @@ from code_agent.tui.app import AgentTuiApp
 
 # tui 入口：解析 --replay 参数后启动 TUI 应用
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="kama-tui", description="KamaClaude TUI")
+    parser = argparse.ArgumentParser(prog="agent-tui", description="Agent TUI")
     parser.add_argument(
         "--replay",
         metavar="RUN_ID",

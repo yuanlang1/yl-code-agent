@@ -11,6 +11,8 @@ class LlmProvider(Protocol):
         messages: list[dict[str, object]],
         tool_schemas: list[dict[str, object]],
         bus: EventBus,
-        run_id: str
+        run_id: str,
+        *,
+        step: int = 0
     ) -> LlmResponse:
         ...

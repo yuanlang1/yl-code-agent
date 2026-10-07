@@ -13,50 +13,55 @@ from code_agent.core.runner import AgentRunner
 from code_agent.core.transport.socket_client import IpcError, SocketClient
 
 class StdoutPrinter:
+    # 接收 dict 格式的事件并将运行进度格式化打印到终端
     def __init__(self) -> None:
-        self._inline = False
+        self._inline = False  # True while LLM tokens are mid-line
         self._run_start: float = 0.0
 
+    # 若当前行有未换行的 token，补一个换行符
     def _ensure_newline(self) -> None:
         if self._inline:
             print()
             self._inline = False
 
-    async def handler(
-        self,
-        event: BaseModel
-    ) -> None:
-        if isinstance(event, RunStartedEvent):
-            self._run_start = time.monotonic()
-            print(f"[run] {event.run_id}")
-        
-        elif isinstance(event, StepStartedEvent):
-            self._ensure_newline()
-            print(f"[step {event.step}] planning...")
+    # 根据事件 type 字段分发并格式化打印到 stdout/stderr
+    async def handle(self, event: dict[str, Any]) -> None:
+        t = event.get("type", "")
 
-        elif isinstance(event, LlmTokenEvent):
-            print(event.token, end = "", flush = True)
+        if t == "run.started":
+            self._run_start = time.monotonic()
+            print(f"[run] {event.get('run_id', '')}")
+
+        elif t == "step.started":
+            self._ensure_newline()
+            print(f"[step {event.get('step')}] planning...")
+
+        elif t == "llm.token":
+            print(event.get("token", ""), end="", flush=True)
             self._inline = True
 
-        elif isinstance(event, ToolCallStartedEvent):
+        elif t == "tool.call_started":
             self._ensure_newline()
-            params_str = json.dumps(event.params, ensure_ascii = True)
-            print(f"[tool] {event.tool_name} {params_str}")
+            params_str = json.dumps(event.get("params", {}), ensure_ascii=False)
+            print(f"[tool] {event.get('tool_name', '')} {params_str}")
 
-        elif isinstance(event, ToolCallFailedEvent):
-            print(f"[tool] {event.tool_name} ✓ {event.elapsed_ms}")
+        elif t == "tool.call_finished":
+            print(f"[tool] {event.get('tool_name', '')} ✓  {event.get('elapsed_ms')}ms")
 
-        elif isinstance(event, ToolCallFailedEvent):
-            print(f"[tool] {event.tool_name} ✗ {event.error_message}", file = sys.stderr)
+        elif t == "tool.call_failed":
+            print(
+                f"[tool] {event.get('tool_name', '')} ✗  {event.get('error_message', '')}",
+                file=sys.stderr,
+            )
 
-        elif isinstance(event, StepFinishedEvent):
+        elif t == "step.finished":
             self._ensure_newline()
-            print(f"[step {event.step}] done")
+            print(f"[step {event.get('step')}] done")
 
-        elif isinstance(event, RunFinishedEvent):
+        elif t == "run.finished":
             self._ensure_newline()
             elapsed = time.monotonic() - self._run_start
-            print(f"[run] {event.status} {event.steps} steps {elapsed:.1f}s")
+            print(f"[run] {event.get('status', '')}  {event.get('steps')} steps  {elapsed:.1f}s")
 
 async def _run_async(
     goal: str,
@@ -65,17 +70,17 @@ async def _run_async(
     client = SocketClient(config.host, config.port)
     try:
         await client.connect()
-    except (ConnectionResetError, OSError):
+    except (ConnectionRefusedError, OSError):
         print(f"error: core not running ({config.host}:{config.port})", file=sys.stderr)
         return 1
-    
-    printer = StdoutPrinter
-    finished = asyncio.Event
+
+    printer = StdoutPrinter()
+    finished = asyncio.Event()
     exit_code = 0
 
     async def on_event(event: dict[str, Any]) -> None:
         nonlocal exit_code
-        await printer.handler(event)
+        await printer.handle(event)
         if event.get("type") == "run.finished":
             if event.get("status") != "success":
                 exit_code = 1
@@ -83,21 +88,16 @@ async def _run_async(
 
     client.on_event(on_event)
     loop_task = asyncio.create_task(client.run_event_loop())
-    
-    try: 
+
+    try:
         await client.send_command(
             "event.subscribe",
             {
                 "topics": ["run.*", "step.*", "tool.*", "llm.token", "llm.usage"],
-                "scope": "global"
-            }
+                "scope": "global",
+            },
         )
-        await client.send_command(
-            "agent.run", 
-            {
-                "goal": goal
-            }
-        )
+        await client.send_command("agent.run", {"goal": goal})
     except IpcError as e:
         print(f"error: {e}", file = sys.stderr)
         loop_task.cancel()
@@ -105,7 +105,7 @@ async def _run_async(
         return 1
 
     await finished.wait()
-    
+
     loop_task.cancel()
     try:
         await loop_task
@@ -116,10 +116,8 @@ async def _run_async(
     return exit_code
 
 def cmd_run(goal: str, config: AgentConfig) -> None:
-    printer = StdoutPrinter()
-    runner = AgentRunner(config, extra_handler = [printer.handler])
-
     try:
-        asyncio.run(runner.run(goal))
+        exit_code = asyncio.run(_run_async(goal, config))
     except KeyboardInterrupt:
         sys.exit(130)
+    sys.exit(exit_code)

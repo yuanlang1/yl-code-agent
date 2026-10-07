@@ -2,13 +2,16 @@
 import asyncio
 from codecs import StreamWriter
 from contextvars import ContextVar
+from datetime import UTC, datetime
 import json
 import logging
 from typing import Any, Awaitable, Callable
 
 from pydantic import BaseModel, ValidationError
 
-from code_agent.core.bus.envelope import INTERNAL_ERROR, INVALID_PARAMS, INVALID_REQUEST, METHOD_NOT_FOUND, PARSE_ERROR, JsonRpcRequest, JsonRpcSuccess, make_error
+from code_agent.core.bus.envelope import INTERNAL_ERROR, INVALID_PARAMS, INVALID_REQUEST, METHOD_NOT_FOUND, PARSE_ERROR, JsonRpcError, JsonRpcRequest, JsonRpcSuccess, make_error
+from code_agent.core.trace.record import TraceRecord
+from code_agent.core.trace.writer import TraceWriter
 from code_agent.core.transport.ipc_boradcaster import IpcEventBroadcaster
 
 
@@ -24,6 +27,9 @@ logger = logging.getLogger(__name__)
 def get_connection_writer() -> asyncio.StreamWriter:
     return _writer_var.get()
 
+def _now() -> str:
+    return datetime.now(UTC).isoformat()
+
 _MAX_LINE_BYTES = 1 * 1024 * 1024
 
 class SocketServer:
@@ -31,14 +37,17 @@ class SocketServer:
         self,
         host: str,
         port: int,
-        broadcaster: IpcEventBroadcaster | None = None
+        broadcaster: IpcEventBroadcaster | None = None,
+        trace: TraceWriter | None = None
     ) -> None:
         self.host = host
         self.port = port
         self._handler: dict[str, CommandHandler] = {}
         self._server: asyncio.AbstractServer | None = None
         self._broadcaster = broadcaster
+        self._trace = trace
 
+    # 添加handler
     def registry(
         self,
         method: str,
@@ -46,6 +55,7 @@ class SocketServer:
     ) -> None:
         self._handler[method] = handler
 
+    # 启动server，如果端口已被占用退出
     async def start(self) -> str:
         try: 
             reader, writer = await asyncio.open_connection(self.host, self.port)
@@ -125,7 +135,24 @@ class SocketServer:
         except ValidationError as e:
             await self._send(writer, make_error(None, INVALID_REQUEST, "Invalid Request", str(e)))
             return 
-        
+
+        if self._trace is not None:
+            client_id = str(writer.get_extra_info("peername", "<unknown>"))
+            self._trace.emit(
+                TraceRecord(
+                    ts = _now(),
+                    direction = "CLIENT->CORE",
+                    layer = "ipc",
+                    kind = "command",
+                    client_id = client_id,
+                    data = {
+                        "method": request.method,
+                        "id": request.id,
+                        "params": request.params
+                    }
+                )
+            )
+
         handler = self._handler.get(request.method)
         if handler is None:
             await self._send(
@@ -154,5 +181,18 @@ class SocketServer:
     ) -> None:
         writer.write(message.model_dump_json().encode() + b"\n")
         await writer.drain()
+        if self._trace is not None:
+            kind = "error" if isinstance(message, JsonRpcError) else "response"
+            client_id = str(writer.get_extra_info("peername", "<unknown>"))
+            self._trace.emit(
+                TraceRecord(
+                    ts = _now(),
+                    direction = "CORE->CLIENT",
+                    layer = "ipc",
+                    kind = kind,
+                    client_id = client_id,
+                    data = message.model_dump()
+                )
+            )
 
     

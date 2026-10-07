@@ -1,6 +1,7 @@
 
 import asyncio
 from dataclasses import dataclass
+from datetime import UTC, datetime
 import fnmatch
 import logging
 import uuid
@@ -9,8 +10,13 @@ from pydantic import BaseModel
 
 from code_agent.core.bus import envelope
 from code_agent.core.bus.envelope import EventPushEnvelope
+from code_agent.core.trace.record import TraceRecord
+from code_agent.core.trace.writer import TraceWriter
 
 logger = logging.getLogger(__name__)
+
+def _now() -> str:
+    return datetime.now(UTC).isoformat()
 
 @dataclass
 class _Subscription:
@@ -21,9 +27,12 @@ class _Subscription:
     
 
 class IpcEventBroadcaster:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        trace: TraceWriter | None = None
+    ) -> None:
         self._subscriptions: list[_Subscription] = []
-
+        self._trace = trace
 
     # 将订阅者添加到订阅列表中
     def subscribe(
@@ -69,8 +78,26 @@ class IpcEventBroadcaster:
             
             try:
                 envelope = EventPushEnvelope(event = event_dict)
-                s.writer(envelope.model_dump_json().encode() + b"\n")
+                s.writer.write(envelope.model_dump_json().encode() + b"\n")
                 await s.writer.drain()
+
+                if self._trace is not None:
+                    client_id = str(s.writer.get_extra_info("peername", "<unknown>"))
+                    self._trace.emit(
+                        TraceRecord(
+                            ts = _now(),
+                            direction = "CORE->CLIENT",
+                            layer = "ipc",
+                            kind = "push",
+                            run_id = run_id,
+                            client_id = client_id,
+                            data = {
+                                "sub_id": s.sub_id,
+                                "event_type": event_type
+                            }
+                        )
+                    )
+
             except (ConnectionError, BrokenPipeError, OSError):
                 logger.debug("dead connection for sub %s, scheduling cleanup", s.sub_id)
                 dead.append(s.writer)

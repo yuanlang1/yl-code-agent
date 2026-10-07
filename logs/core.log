@@ -1,48 +1,224 @@
-level=INFO ts=2026-09-24T18:17:31 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T18:17:31 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T18:18:35 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T18:18:39 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T18:18:39 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T18:18:44 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T18:18:47 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T18:18:47 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T18:21:24 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T18:21:31 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T18:21:31 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T19:30:22 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T19:30:26 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T19:30:26 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T19:42:52 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T19:42:56 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T19:42:56 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='claude-sonnet-4-6', router='static'))"
-level=INFO ts=2026-09-24T19:56:06 source=anthropic._base_client msg="Retrying request to /v1/messages in 0.407673 seconds"
-level=INFO ts=2026-09-24T19:56:11 source=anthropic._base_client msg="Retrying request to /v1/messages in 0.889803 seconds"
-level=INFO ts=2026-09-24T19:59:12 source=anthropic._base_client msg="Retrying request to /v1/messages in 0.375155 seconds"
-level=INFO ts=2026-09-24T19:59:17 source=anthropic._base_client msg="Retrying request to /v1/messages in 0.821298 seconds"
-level=INFO ts=2026-09-24T19:59:23 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-09-24T19:59:27 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-09-24T19:59:27 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'))"
-level=INFO ts=2026-09-24T20:08:42 source=httpx2 msg="HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 401 Unauthorized""
-level=INFO ts=2026-09-24T20:10:03 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 400 Bad Request""
-level=INFO ts=2026-09-24T20:23:02 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 400 Bad Request""
-level=INFO ts=2026-09-24T20:23:47 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 400 Bad Request""
-level=INFO ts=2026-09-24T20:33:49 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 400 Bad Request""
-level=INFO ts=2026-09-24T20:38:28 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 400 Bad Request""
-level=INFO ts=2026-09-24T20:40:03 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:41:46 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:42:39 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:43:44 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:44:05 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:45:17 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:53:58 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:57:33 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T20:57:54 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T21:03:11 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T21:18:44 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-09-24T21:19:11 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-10-05T19:18:20 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-10-05T19:18:20 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'))"
-level=INFO ts=2026-10-05T19:19:59 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
-level=INFO ts=2026-10-05T21:56:03 source=code_agent.core.app msg="shutting down"
-level=INFO ts=2026-10-05T21:58:27 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
-level=INFO ts=2026-10-05T21:58:27 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'))"
+level=INFO ts=2026-10-06T21:16:44 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:16:44 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001BAA1D30D40>)"
+level=INFO ts=2026-10-06T21:26:38 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:26:38 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001B9A3034AD0>)"
+level=INFO ts=2026-10-06T21:28:25 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:28:35 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:28:35 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x00000200C4D749E0>)"
+level=INFO ts=2026-10-06T21:28:45 source=code_agent.core.app msg="new sub:"
+level=INFO ts=2026-10-06T21:29:46 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:29:54 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:29:54 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001FC61D64920>)"
+level=INFO ts=2026-10-06T21:30:20 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:35:55 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:36:17 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:37:54 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:40:07 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:40:13 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:40:13 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x0000025435990C80>)"
+level=INFO ts=2026-10-06T21:40:38 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:40:38 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T21:40:38 source=code_agent.core.transport.socket_server msg="handler agent.run raised AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_server.py", line 165, in _handle_line
+    result = await handler(request.params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\codex\yl-code-agent\src\code_agent\core\app.py", line 69, in _agent_run_handler
+    runner = AgentRunner(self._config, bus = self._bus)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'
+level=INFO ts=2026-10-06T21:42:14 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:42:22 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:42:22 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x0000016C9EBB3650>)"
+level=INFO ts=2026-10-06T21:42:35 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:42:42 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:42:42 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000002956B3A5640>)"
+level=INFO ts=2026-10-06T21:43:04 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:43:04 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T21:43:04 source=code_agent.core.transport.socket_server msg="handler agent.run raised AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_server.py", line 165, in _handle_line
+    result = await handler(request.params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\codex\yl-code-agent\src\code_agent\core\app.py", line 69, in _agent_run_handler
+    runner = AgentRunner(self._config, bus = self._bus, trace = self._trace)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'
+level=INFO ts=2026-10-06T21:44:07 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:44:23 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:44:23 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000002D19650E840>)"
+level=INFO ts=2026-10-06T21:45:37 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T21:45:37 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T21:45:37 source=code_agent.core.transport.socket_server msg="handler agent.run raised AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_server.py", line 165, in _handle_line
+    result = await handler(request.params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\codex\yl-code-agent\src\code_agent\core\app.py", line 69, in _agent_run_handler
+    runner = AgentRunner(self._config, bus = self._bus, trace = self._trace)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AgentRunner.__init__() missing 1 required keyword-only argument: 'extra_handler'
+level=INFO ts=2026-10-06T21:46:47 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T21:47:14 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T21:47:14 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001FF99A549E0>)"
+level=INFO ts=2026-10-06T22:01:49 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:01:49 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T22:01:49 source=code_agent.core.transport.socket_server msg="handler agent.run raised 'AgentRunner' object has no attribute 'run'"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_server.py", line 165, in _handle_line
+    result = await handler(request.params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\codex\yl-code-agent\src\code_agent\core\app.py", line 71, in _agent_run_handler
+    runner.run(goal = cmd.goal, run_id = run_id)
+    ^^^^^^^^^^
+AttributeError: 'AgentRunner' object has no attribute 'run'
+level=INFO ts=2026-10-06T22:06:49 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T22:07:02 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T22:07:02 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001F576C54B90>)"
+level=INFO ts=2026-10-06T22:07:21 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:07:21 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T22:07:21 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-7' coro=<AgentRunner.run() done, defined at E:\codex\yl-code-agent\src\code_agent\core\runner.py:49> exception=TypeError("'StreamWriter' object is not callable")>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 55, in run
+    await self.run_and_capture(
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 82, in run_and_capture
+    await bus.publish(
+  File "E:\codex\yl-code-agent\src\code_agent\core\events\bus.py", line 23, in publish
+    await handler(event)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\ipc_boradcaster.py", line 82, in handle
+    s.writer(envelope.model_dump_json().encode() + b"\n")
+TypeError: 'StreamWriter' object is not callable
+level=INFO ts=2026-10-06T22:08:46 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T22:08:56 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T22:08:56 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001E256BF08F0>)"
+level=INFO ts=2026-10-06T22:09:44 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:09:44 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T22:09:44 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-7' coro=<AgentRunner.run() done, defined at E:\codex\yl-code-agent\src\code_agent\core\runner.py:49> exception=2 validation errors for TraceRecord
+kind
+  Field required [type=missing, input_value={'ts': '2026-10-06T14:09:...t_type': 'run.started'}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+client_id
+  Input should be a valid string [type=string_type, input_value=('127.0.0.1', 57943), input_type=tuple]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 55, in run
+    await self.run_and_capture(
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 82, in run_and_capture
+    await bus.publish(
+  File "E:\codex\yl-code-agent\src\code_agent\core\events\bus.py", line 23, in publish
+    await handler(event)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\ipc_boradcaster.py", line 88, in handle
+    TraceRecord(
+  File "E:\codex\yl-code-agent\.venv\Lib\site-packages\pydantic\main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for TraceRecord
+kind
+  Field required [type=missing, input_value={'ts': '2026-10-06T14:09:...t_type': 'run.started'}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+client_id
+  Input should be a valid string [type=string_type, input_value=('127.0.0.1', 57943), input_type=tuple]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+level=INFO ts=2026-10-06T22:12:23 source=code_agent.core.app msg="shutting down"
+level=ERROR ts=2026-10-06T22:12:29 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<SocketClient.run_event_loop() done, defined at E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py:67> exception=AttributeError("'StdoutPrinter' object has no attribute 'handle'")>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 80, in run_event_loop
+    await self._dispatch(line)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 113, in _dispatch
+    await handler(event_data)
+  File "E:\codex\yl-code-agent\src\code_agent\cli\commands\run.py", line 78, in on_event
+    await printer.handle(event)
+          ^^^^^^^^^^^^^^
+AttributeError: 'StdoutPrinter' object has no attribute 'handle'. Did you mean: 'handler'?
+level=INFO ts=2026-10-06T22:12:35 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T22:12:35 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000002755F28E150>)"
+level=INFO ts=2026-10-06T22:12:44 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:12:44 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=ERROR ts=2026-10-06T22:12:44 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-7' coro=<AgentRunner.run() done, defined at E:\codex\yl-code-agent\src\code_agent\core\runner.py:49> exception=1 validation error for TraceRecord
+client_id
+  Input should be a valid string [type=string_type, input_value=('127.0.0.1', 58650), input_type=tuple]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 55, in run
+    await self.run_and_capture(
+  File "E:\codex\yl-code-agent\src\code_agent\core\runner.py", line 82, in run_and_capture
+    await bus.publish(
+  File "E:\codex\yl-code-agent\src\code_agent\core\events\bus.py", line 23, in publish
+    await handler(event)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\ipc_boradcaster.py", line 88, in handle
+    TraceRecord(
+  File "E:\codex\yl-code-agent\.venv\Lib\site-packages\pydantic\main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for TraceRecord
+client_id
+  Input should be a valid string [type=string_type, input_value=('127.0.0.1', 58650), input_type=tuple]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+level=INFO ts=2026-10-06T22:13:23 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-06T22:13:34 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-06T22:13:34 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001FF6558E150>)"
+level=ERROR ts=2026-10-06T22:14:09 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<SocketClient.run_event_loop() done, defined at E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py:67> exception=AttributeError("'StdoutPrinter' object has no attribute 'handle'")>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 80, in run_event_loop
+    await self._dispatch(line)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 113, in _dispatch
+    await handler(event_data)
+  File "E:\codex\yl-code-agent\src\code_agent\cli\commands\run.py", line 78, in on_event
+    await printer.handle(event)
+          ^^^^^^^^^^^^^^
+AttributeError: 'StdoutPrinter' object has no attribute 'handle'. Did you mean: 'handler'?
+level=INFO ts=2026-10-06T22:14:16 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:14:16 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=INFO ts=2026-10-06T22:14:16 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
+level=ERROR ts=2026-10-06T22:14:52 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<SocketClient.run_event_loop() done, defined at E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py:67> exception=AttributeError("'StdoutPrinter' object has no attribute 'handle'")>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 80, in run_event_loop
+    await self._dispatch(line)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 113, in _dispatch
+    await handler(event_data)
+  File "E:\codex\yl-code-agent\src\code_agent\cli\commands\run.py", line 78, in on_event
+    await printer.handle(event)
+          ^^^^^^^^^^^^^^
+AttributeError: 'StdoutPrinter' object has no attribute 'handle'. Did you mean: 'handler'?
+level=INFO ts=2026-10-06T22:14:58 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:14:58 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=INFO ts=2026-10-06T22:14:59 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
+level=ERROR ts=2026-10-06T22:16:56 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<SocketClient.run_event_loop() done, defined at E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py:67> exception=AttributeError("'StdoutPrinter' object has no attribute 'handle'")>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 80, in run_event_loop
+    await self._dispatch(line)
+  File "E:\codex\yl-code-agent\src\code_agent\core\transport\socket_client.py", line 113, in _dispatch
+    await handler(event_data)
+  File "E:\codex\yl-code-agent\src\code_agent\cli\commands\run.py", line 78, in on_event
+    await printer.handler(event)
+          ^^^^^^^^^^^^^^
+AttributeError: 'StdoutPrinter' object has no attribute 'handle'. Did you mean: 'handler'?
+level=INFO ts=2026-10-06T22:17:05 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:17:05 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=INFO ts=2026-10-06T22:17:06 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
+level=INFO ts=2026-10-06T22:18:50 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-06T22:18:50 source=code_agent.core.app msg="new run: {'goal': '你好'}"
+level=INFO ts=2026-10-06T22:18:50 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
+level=INFO ts=2026-10-07T11:45:26 source=code_agent.core.app msg="new sub: {'topics': ['run.*', 'step.*', 'tool.*', 'llm.token', 'llm.usage'], 'scope': 'global'}"
+level=INFO ts=2026-10-07T11:45:26 source=code_agent.core.app msg="new run: {'goal': '你的模型是？'}"
+level=INFO ts=2026-10-07T11:45:26 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""
+level=INFO ts=2026-10-07T11:49:53 source=code_agent.core.app msg="shutting down"
+level=ERROR ts=2026-10-07T11:50:04 source=asyncio msg="Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<TraceWriter._drain() done, defined at E:\codex\yl-code-agent\src\code_agent\core\trace\writer.py:38> exception=UnicodeEncodeError('gbk', '{"ts":"2026-10-06T14:14:17.477372+00:00","direction":"CORE","layer":"event","kind":"event","run_id":"20261006-141416-96142a","step":null,"client_id":null,"data":{"type":"llm.token","run_id":"20261006-141416-96142a","token":" 😊","ts":"2026-10-06T14:14:17.477263+00:00"}}\r\n', 225, 226, 'illegal multibyte sequence')>"
+Traceback (most recent call last):
+  File "E:\codex\yl-code-agent\src\code_agent\core\trace\writer.py", line 43, in _drain
+    f.write(record.model_dump_json() + "\n")
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f60a' in position 225: illegal multibyte sequence
+level=INFO ts=2026-10-07T11:50:10 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-07T11:50:10 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x000001B7D73C3F50>)"
+level=INFO ts=2026-10-07T11:50:18 source=code_agent.core.app msg="shutting down"
+level=INFO ts=2026-10-07T11:50:24 source=code_agent.core.app msg="agent-core 0.0.1 listening 127.0.0.1:7437"
+level=INFO ts=2026-10-07T11:50:24 source=code_agent.core.app msg="config AgentConfig(host='127.0.0.1', port='7437', logging=LoggingConfig(level='INFO', file='./logs/core.log', format='text'), loop=LoopConfig(max_steps=20), llm=LlmConfig(default_model='deepseek-flash', router='static'), trace=<code_agent.core.config.TraceConfig object at 0x0000023441114BC0>)"
+level=INFO ts=2026-10-07T11:52:51 source=httpx2 msg="HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages "HTTP/1.1 200 OK""

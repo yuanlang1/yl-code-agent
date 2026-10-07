@@ -23,10 +23,10 @@ class SocketClient:
     ) -> None:
         self._host = host
         self._port = port
-        self._reader = asyncio.StreamReader()
-        self._writer = asyncio.StreamWriter(self._reader, None, None, None)
-        self._pending = dict[str, asyncio.Future[dict[str, Any]]] = {}
-        self._event_handler = list[EventHandler] = []
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
+        self._pending: dict[str, asyncio.Future[dict[str, Any]]] = {}
+        self._event_handler: list[EventHandler] = []
 
     async def connect(self) -> None:
         self._reader, self._writer = await asyncio.open_connection(
@@ -56,6 +56,7 @@ class SocketClient:
 
         request_id = str(uuid.uuid4())
         request = JsonRpcRequest(id = request_id, method = method, params = params)
+        print(f"request: {request}")
         fut: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
         self._pending[request_id] = fut
         self._writer.write(request.model_dump_json().encode() + b"\n")
@@ -64,7 +65,7 @@ class SocketClient:
         return await fut
 
     async def run_event_loop(self) -> None:
-        if self._read is None:
+        if self._reader is None:
             raise RuntimeError("not connected - call connect() first")
         
         try:
@@ -83,14 +84,13 @@ class SocketClient:
                     fut.cancel()
                 
             self._pending.clear()
-        
 
     async def _dispatch(
         self,
         line: bytes
     ) -> None:
         try:
-            msg: dict[str, Any] = json.load(line)
+            msg: dict[str, Any] = json.loads(line)
         except json.JSONDecodeError:
             return
 
@@ -99,12 +99,13 @@ class SocketClient:
             if req_id and req_id in self._pending:
                 fut = self._pending.pop(req_id)
                 if not fut.done():
-                    err = msg["error"]
-                    fut.set_exception(
-                        IpcError(err.get("code", -1, ), err.get("message", "unknown"))
-                    )
-                else:
-                    fut.set_result(msg.get("result") or {})
+                    if "error" in msg:
+                        err = msg["error"]
+                        fut.set_exception(
+                            IpcError(err.get("code", -1), err.get("message", "unknown"))
+                        )
+                    else:
+                        fut.set_result(msg.get("result") or {})
 
         elif msg.get("kind") == "event":
             event_data: dict[str, Any] = msg.get("event", {})

@@ -36,10 +36,11 @@ class AgentLoop:
 
             try:
                 resp = await self._provider.chat(
-                    context.messages, 
-                    self._registry.tool_schemas(),
-                    self._bus, 
-                    context.run_id
+                    messages =  context.messages, 
+                    tool_schemas = self._registry.tool_schemas(),
+                    bus = self._bus, 
+                    run_id = context.run_id,
+                    step = context.step
                 )
             except asyncio.CancelledError:
                 context.mark_failed("cancelled")

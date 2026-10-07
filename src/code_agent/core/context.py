@@ -13,6 +13,7 @@ class ExecutionContext:
     messages: list[dict[str, Any]] = field(default_factory = list)
     status: str = "running"
     reason: str | None = None
+    result: str = ""
 
     def __post_init__(self) -> None:
         if not self.messages:

@@ -17,7 +17,7 @@ dependencies = [
 
 # 安装后可在 PATH 中执行的入口
 [project.scripts]
-agent = "code_agent.cli.main:main"
+agent-cli = "code_agent.cli.main:main"
 agent-core = "code_agent.core.app:run"
 agent-tui = "code_agent.tui.__main__:main"
 

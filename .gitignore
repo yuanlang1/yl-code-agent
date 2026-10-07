@@ -5,3 +5,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+runs/
+log/
+scripts/
+.vscode/
+.agent/
+tests/
