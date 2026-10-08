@@ -13,7 +13,6 @@ class ToolResult:
     is_error: bool = False
     error_type: str | None = None
 
-@dataclass
 class BaseTool(ABC):
     name: str
     description: str

@@ -78,7 +78,14 @@ async def invoke_tool(
         try:
             tool.params_model.model_validate(dict(tool_call.input))
         except ValidationError as e:
-            return await _fail(bus, run_id, tool_call, "schema_error", str(e), elapsed())
+            return await _fail(
+                bus = bus,
+                run_id = run_id, 
+                tool_call = tool_call, 
+                error_type = "schema_error", 
+                error_message = str(e), 
+                elapsed_ms = elapsed(), 
+            )
 
     for attempt in (1, _MAX_RETRIES + 2):
         try:
@@ -90,7 +97,11 @@ async def invoke_tool(
             else:
                 await bus.publish(
                     ToolCallFinishedEvent(
-                        run_id, tool_call.id, tool_call.name, elapsed(), _now()
+                        run_id = run_id, 
+                        tool_use_id = tool_call.id, 
+                        tool_name = tool_call.name, 
+                        elapsed_ms = elapsed(), 
+                        ts = _now()
                     )
                 )
                 return result
@@ -111,12 +122,26 @@ async def invoke_tool(
         if attempt <= _MAX_RETRIES or error_class in _RETRYABLE:
             await bus.publish(
                 ToolCallFailedEvent(
-                    run_id, tool_call.id, tool.name, 
-                    error_class, error_message, elapsed(), attempt, _now()
+                    run_id = run_id,
+                    tool_use_id = tool_call.id,
+                    tool_name = tool.name,
+                    error_type = error_class,
+                    error_message = error_message,
+                    elapsed_ms = elapsed(),
+                    attempt = attempt,
+                    ts = _now()
                 )
             )
 
             await asyncio.sleep(_RETRY_BASE_S * (2 ** (attempt - 1)))
             continue
-
-    await _fail(run_id, tool_call, error_class, error_message, elapsed(), attempt)
+            
+    return await _fail(
+        bus = bus,
+        run_id = run_id, 
+        tool_call = tool_call, 
+        error_type = error_class, 
+        error_message = error_message, 
+        elapsed_ms = elapsed(), 
+        attempt = attempt
+    )

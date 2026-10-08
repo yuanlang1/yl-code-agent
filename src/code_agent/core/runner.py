@@ -14,7 +14,16 @@ from code_agent.core.llm.base import LlmProvider
 from code_agent.core.llm.provider import AnthropicProvider
 from code_agent.core.loop import AgentLoop
 from code_agent.core.runs import RUNS_DIR, new_run_id
+from code_agent.core.task import TaskManager
+from code_agent.core.tools.builtin.bash import BashTool
+from code_agent.core.tools.builtin.environment_info import EnvironmentInfoTool
+from code_agent.core.tools.builtin.listdir import ListDirTool
 from code_agent.core.tools.builtin.read_file import ReadFileTool
+from code_agent.core.tools.builtin.task_create import TaskCreateTool
+from code_agent.core.tools.builtin.task_get import TaskGetTool
+from code_agent.core.tools.builtin.task_list import TaskListTool
+from code_agent.core.tools.builtin.task_update import TaskUpdateTool
+from code_agent.core.tools.builtin.write_file import WriteFileTool
 from code_agent.core.tools.registry import ToolRegistry
 from code_agent.core.trace.provider import TracingProvider
 from code_agent.core.trace.writer import TraceWriter
@@ -46,6 +55,22 @@ class AgentRunner:
         self._runs_dir = runs_dir or RUNS_DIR
         self._trace = trace
 
+    def _build_registry(
+        self,
+        task_manager: TaskManager
+    ) -> ToolRegistry:
+        registry = ToolRegistry()
+        registry.registry(ReadFileTool())
+        registry.registry(BashTool())
+        registry.registry(WriteFileTool())
+        registry.registry(ListDirTool())
+        registry.registry(EnvironmentInfoTool())
+        registry.registry(TaskCreateTool(task_manager))
+        registry.registry(TaskUpdateTool(task_manager))
+        registry.registry(TaskListTool(task_manager))
+        registry.registry(TaskGetTool(task_manager))
+        return registry
+
     async def run(
         self,
         goal: str,
@@ -65,6 +90,8 @@ class AgentRunner:
         run_id = run_id or new_run_id()
         run_path = self._runs_dir / run_id
         run_path.mkdir(parents = True, exist_ok = True)
+
+        task_manager = TaskManager(run_path / ".tasks")
 
         bus = self._bus if self._bus is not None else EventBus()
         for handler in self._extra_handler:
@@ -91,9 +118,7 @@ class AgentRunner:
                     include_payload = self._config.trace.include_llm_payload
                 )
 
-            registry = ToolRegistry()
-            registry.registry(ReadFileTool)
-
+            registry = self._build_registry(task_manager)
             loop = AgentLoop(provider, bus, registry)
 
             cancelled = False

@@ -37,7 +37,7 @@ class ExecutionContext:
         content: str,
         is_error: bool = False
     ) -> None:
-        block: dict[str, object] = {
+        block: dict[str, Any] = {
             "type": "tool_result",
             "tool_use_id": tool_use_id,
             "content": content
@@ -46,7 +46,7 @@ class ExecutionContext:
         if is_error:
             block["is_error"] = True
 
-        last = self.messages[:-1] if self.messages else None
+        last = self.messages[-1] if self.messages else None
         if (
             last is not None
             and last["role"] == "user"

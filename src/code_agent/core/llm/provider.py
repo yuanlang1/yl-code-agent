@@ -95,7 +95,7 @@ class AnthropicProvider:
         tool_calls: list[ToolCallBack] = []
 
         for block in final_message.content:
-            if block == "tool_calls":
+            if block.type == "tool_use":
                 tool_calls.append(
                     ToolCallBack(
                         id = block.id, 

@@ -36,7 +36,7 @@ class AgentLoop:
 
             try:
                 resp = await self._provider.chat(
-                    messages =  context.messages, 
+                    messages = context.messages, 
                     tool_schemas = self._registry.tool_schemas(),
                     bus = self._bus, 
                     run_id = context.run_id,
@@ -54,21 +54,31 @@ class AgentLoop:
             
             if resp.text:
                 block.append({
-                    "type": "text", "content": resp.text
+                    "type": "text", "text": resp.text
                 })
             for tool in resp.tool_calls:
                 block.append({
-                    "type": "tool_call", "id": tool.id, "name": tool.name, "input": tool.input
+                    "type": "tool_use", "id": tool.id, "name": tool.name, "input": tool.input
                 })
             
             context.add_assistant_message(block)
 
             if resp.stop_reason == "tool_use":
                 for tool in resp.tool_calls:
-                    result = await invoke_tool(self._registry, tool, self._bus, context.run_id)
-                    context.add_tool_result(tool.id, result.content, result.is_error)
+                    result = await invoke_tool(
+                        registry = self._registry, 
+                        tool_call = tool, 
+                        bus = self._bus, 
+                        run_id = context.run_id
+                    )
+                    context.add_tool_result(
+                        tool_use_id = tool.id, 
+                        content = result.content, 
+                        is_error = result.is_error
+                    )
 
             if resp.stop_reason == "end_turn":
+                context.result = resp.text or ""
                 context.mark_success()
             elif context.step >= context.max_steps:
                 context.mark_failed("exceeded_max_steps")

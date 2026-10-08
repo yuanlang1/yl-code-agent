@@ -56,7 +56,6 @@ class SocketClient:
 
         request_id = str(uuid.uuid4())
         request = JsonRpcRequest(id = request_id, method = method, params = params)
-        print(f"request: {request}")
         fut: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
         self._pending[request_id] = fut
         self._writer.write(request.model_dump_json().encode() + b"\n")

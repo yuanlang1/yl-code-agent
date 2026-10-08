@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from pydantic import BaseModel, Discriminator
 
 class CoreStartedEvent(BaseModel):
@@ -39,7 +39,7 @@ class ToolCallStartedEvent(BaseModel):
     run_id: str
     tool_use_id: str
     tool_name: str
-    params: str
+    params: dict[str, Any]
     ts: str
 
 class ToolCallFinishedEvent(BaseModel):

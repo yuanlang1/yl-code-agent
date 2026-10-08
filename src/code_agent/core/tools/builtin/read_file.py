@@ -20,7 +20,6 @@ class ReadFileTool(BaseTool):
         "Read the text content of a file. "
         "Path must be relative to the current working directory. "
         "Files larger than 512 KB are truncated.")
-
     params_model = ReadFileParam
     input_schemas: dict[str, object] = ReadFileParam.model_json_schema()
 
@@ -29,10 +28,10 @@ class ReadFileTool(BaseTool):
         params: dict[str, object]
     ) -> ToolResult:
         # 再次检验
-        validated_params = self.params_model.model_validate(params)
+        validated = self.params_model.model_validate(params)
+        path_str = validated.path
 
-        path_str = str(validated_params.path)
-        if ".." in Path(path_str).parts():
+        if ".." in Path(path_str).parts:
             raise PermissionError(f"path traversal not allowed: {path_str}")
 
         path = Path(path_str)
