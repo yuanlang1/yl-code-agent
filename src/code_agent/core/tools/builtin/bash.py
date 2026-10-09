@@ -61,7 +61,7 @@ class BashTool(BaseTool):
                 error_type = "runtime_error"
             )
 
-        output = stdout_bytes.decode("utf-8", errors = "replace")
+        output = stdout_bytes.decode(encoding = "utf-8", errors = "replace")
         truncated = len(stdout_bytes) > _MAX_OUTPUT_BYTES
         if truncated:
             output = output[:_MAX_OUTPUT_BYTES] + "\n[truncated]"
@@ -70,9 +70,9 @@ class BashTool(BaseTool):
 
         if returncode != 0:
             return ToolResult(
-                content=f"[exit {returncode}]\n{output}",
-                is_error=True,
-                error_type="runtime_error",
+                content = f"[exit {returncode}]\n{output}",
+                is_error = True,
+                error_type = "runtime_error",
             )
 
-        return ToolResult(content=output or "[no output]")
+        return ToolResult(content = output or "[no output]") 

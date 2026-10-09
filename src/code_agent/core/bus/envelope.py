@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Literal
 from pydantic import BaseModel, Field
 
@@ -27,6 +29,8 @@ class EventPushEnvelope(BaseModel):
     kind: Literal["event"] = "event"
     event: dict[str, object]
 
+    
+
 
 # errors
 PARSE_ERROR = -32700      # 解析错误
@@ -35,6 +39,17 @@ METHOD_NOT_FOUND = -32601 # 方法不存在
 INVALID_PARAMS = -32602   # 参数错误
 INTERNAL_ERROR = -32603   # 服务器内部错误
     
+class HandlerError(Exception):
+    def __init__(
+        self, 
+        code: int,
+        message: str,
+        data: Any = None
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.data = data
+
 def make_error(
     id: str | None,
     code: int,

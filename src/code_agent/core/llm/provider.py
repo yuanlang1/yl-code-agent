@@ -42,14 +42,18 @@ class AnthropicProvider:
         bus: EventBus,
         run_id: str,
         *,
-        step: int = 0
+        step: int = 0,
+        system: str | None = None
     ) -> LlmResponse:
         await bus.publish(
             LlmModelSelectedEvent(run_id = run_id, model = self.model, strategy = "static", ts = _now())
         )
 
-        system: list[dict[str, object]] = [
-           {"type": "text", "text": _SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}},
+        system_block: list[dict[str, object]] = [{
+                "type": "text", 
+                "text": system or  _SYSTEM_PROMPT, 
+                "cache_control": {"type": "ephemeral"}
+            },
         ]
 
         tools: list[dict[str, object]] = list(tool_schemas)
@@ -61,7 +65,7 @@ class AnthropicProvider:
         kwargs: dict[str, object] = {
             "model": self.model,
             "max_tokens": 4096,
-            "system": system,
+            "system": system_block,
             "messages": messages
         }
 

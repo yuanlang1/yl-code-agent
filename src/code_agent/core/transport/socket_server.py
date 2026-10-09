@@ -48,7 +48,7 @@ class SocketServer:
         self._trace = trace
 
     # 添加handler
-    def registry(
+    def register(
         self,
         method: str,
         handler: CommandHandler

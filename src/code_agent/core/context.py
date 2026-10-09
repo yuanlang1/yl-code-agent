@@ -8,7 +8,8 @@ class ExecutionContext:
     run_id: str
     goal: str
     max_steps: int
-
+    prefill_messages: list[dict[str, Any]] = field(default_factory = list)
+    session_notes: str = ""
     step: int = 0
     messages: list[dict[str, Any]] = field(default_factory = list)
     status: str = "running"
@@ -16,11 +17,28 @@ class ExecutionContext:
     result: str = ""
 
     def __post_init__(self) -> None:
+        if self.prefill_messages:
+            self.messages = [dict(m) for m in self.prefill_messages]
+
         if not self.messages:
             self.messages.append({
             "role": "user",
             "content": self.goal
         })
+
+    def system_prompt(
+        self,
+        base: str
+    ) -> str:
+        if not self.session_notes.strip():
+            return base
+        
+        return (
+            base
+            + "\n\n## Session notes\n"
+            + self.session_notes.strip()
+            + "\n\nRemember important durable facts by calling note_save"
+        )
     
     def add_assistant_message(
         self,
