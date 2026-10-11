@@ -62,6 +62,24 @@ class SessionCloseCommand(BaseModel):
 class SessionCloseResult(BaseModel):
     status: SessionStatus
 
+class PermissionRespondCommand(BaseModel):
+    type: Literal["permission.respond"] = "permission.respond"
+    tool_use_id: str
+    # "allow_once" | "always_allow" | "deny_once" | "always_deny"
+    decision: str
+
+class PermissionRespondResult(BaseModel):
+    ok: bool = True
+
+class SessionCompactCommand(BaseModel):
+    type: Literal["session.compact"] = "session.compact"
+    session_id: str
+    focus: str = ""
+
+class SessionCompactResult(BaseModel):
+    summary_tokens: int
+    saved_tokens: int
+
 
 # 根据 type 字段决定命令类型的判别联合
 Command = Annotated[

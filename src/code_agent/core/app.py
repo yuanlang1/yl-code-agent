@@ -14,13 +14,16 @@ from typing import Any
 from pydantic import BaseModel
 
 import code_agent
-from code_agent.core.bus.commands import AgentRunCommand, AgentRunResult, EventSubscribeCommand, EventSubscribeResult, PongResult, SessionCloseCommand, SessionCloseResult, SessionCreateCommand, SessionCreateResult, SessionGetHistoryCommand, SessionGetHistoryResult, SessionSendMessageCommand, SessionSendMessageResult
+from code_agent.core.bus.commands import AgentRunCommand, AgentRunResult, EventSubscribeCommand, EventSubscribeResult, PermissionRespondCommand, PermissionRespondResult, PongResult, SessionCloseCommand, SessionCloseResult, SessionCompactCommand, SessionCompactResult, SessionCreateCommand, SessionCreateResult, SessionGetHistoryCommand, SessionGetHistoryResult, SessionSendMessageCommand, SessionSendMessageResult
 from code_agent.core.bus.envelope import EventPushEnvelope
 from code_agent.core.config import AgentConfig, get_config
 from code_agent.core.events.bus import EventBus
+from code_agent.core.llm.provider import AnthropicProvider
 from code_agent.core.logging_setup import setup_logging
+from code_agent.core.permissions import load_policy_file
+from code_agent.core.permissions.manager import PermissionManager
 from code_agent.core.runner import AgentRunner
-from code_agent.core.runs import events_file, new_run_id, session_dir
+from code_agent.core.runs import events_file, new_run_id, policy_dir, session_dir
 from code_agent.core.session.manager import SessionManager
 from code_agent.core.session.store import SessionStore
 from code_agent.core.trace.record import TraceRecord
@@ -44,6 +47,7 @@ class CoreApp:
         self._trace: TraceWriter | None = None
         self._running_runs: set[asyncio.Task[None]] = set[asyncio.Task[None]]()
         self._sessions: SessionManager | None = None
+        self._permission_manager: PermissionManager | None = None
 
     async def _ping_handler(
         self,
@@ -120,6 +124,35 @@ class CoreApp:
         await self._sessions.close(cmd.session_id)
 
         return SessionCloseResult(status = "closed")
+
+    async def _permission_respond_handler(
+        self,
+        params: dict[str, Any]
+    ) -> PermissionRespondResult:
+        cmd = PermissionRespondCommand.model_validate(params)
+        logger.info(
+            "permission.respond received tool_use_id=%s decision=%s",
+            cmd.tool_use_id, cmd.decision
+        )
+
+        if self._permission_manager is None:
+            logger.error("permission.respond: PermissionManager not initialized")
+            return PermissionRespondResult()
+
+        self._permission_manager.respond(tool_use_id = cmd.tool_use_id, decision = cmd.decision)
+
+        return PermissionRespondResult()
+
+    async def _session_compact_handler(
+        self,
+        params: dict[str, Any]
+    ) -> SessionCompactResult:
+        assert self._sessions is not None
+
+        cmd = SessionCompactCommand.model_validate(params)
+        result = await self._sessions.compact(cmd.session_id, cmd.focus)
+
+        return result
 
     async def _subscribe_handler(
         self,
@@ -201,6 +234,7 @@ class CoreApp:
         
         return count    
 
+
     async def run(self) -> None:
         self._start_time = time.monotonic()
         self._config = get_config()
@@ -211,16 +245,35 @@ class CoreApp:
             self._trace = TraceWriter(trace_path)
             await self._trace.start()
             self._bus.subscribe(self._trace_event_handler)
+        
+        policy_file = policy_dir().expanduser()
+        self._permission_manager = PermissionManager(
+            policy_file = policy_file,
+            timeout_s = self._config.permission.timeout_s
+        )
+
+        logger.info(
+            "permission manager: timeout=%s persistent=%s entries.",
+            self._config.permission.timeout_s,
+            len(load_policy_file(policy_file))
+        )
 
         self._broadcaster = IpcEventBroadcaster(trace = self._trace)
         self._bus.subscribe(self._broadcaster.handle)
 
         session_root = Path(session_dir()).expanduser()
         store = SessionStore(session_root)
+        compact_provider = AnthropicProvider(self._config.llm.default_model)
         self._sessions = SessionManager(
             store = store,
-            runner_factory = lambda: AgentRunner(self._config, bus = self._bus, trace = self._trace),
-            bus = self._bus
+            runner_factory = lambda: AgentRunner(
+                config = self._config, 
+                bus = self._bus, 
+                trace = self._trace,
+                permission_manager = self._permission_manager
+            ),
+            bus = self._bus,
+            provider = compact_provider
         )        
 
         server = SocketServer(
@@ -236,6 +289,8 @@ class CoreApp:
         server.register("session.send_message", self._session_send_handler)
         server.register("session.get_history", self._session_history_handler)
         server.register("session.close", self._session_close_handler)
+        server.register("permission.respond", self._permission_respond_handler)
+        server.register("session.compact", self._session_compact_handler)
 
         # return host:port
         addr = await server.start()

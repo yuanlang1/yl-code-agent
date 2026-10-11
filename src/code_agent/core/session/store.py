@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from code_agent.core.compact.budget import truncate_tool_results
 from code_agent.core.session.model import Session
 
 logger = logging.getLogger(__name__)
@@ -122,8 +123,9 @@ class SessionStore:
                 "content": row.get("content", "")
             })
 
-        return self._trim_orphan_tool_use(messages)
-    
+        messages = self._trim_orphan_tool_use(messages)
+        return truncate_tool_results(messages)
+
     def _trim_orphan_tool_use(
         self,
         messages: list[dict[str, Any]]
@@ -174,3 +176,24 @@ class SessionStore:
 
         with (path / "notes.md").open("a", encoding = "utf-8") as f:
             f.write(f"## Note ({_now()}, {run_id}) \n{content}\n\n")
+
+    
+    def write_compacted(
+        self,
+        session_id: str,
+        messages: list[dict[str, Any]]
+    ) -> None:
+        path = self.session_dir(session_id) / "thread.jsonl"
+        ts_str = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+        bak = self.session_dir(session_id) / f"thread_{ts_str}.jsonl.bak"
+        if path.exists():
+            path.rename(bak)
+
+        with path.open("w", encoding = "utf-8") as f:
+            for msg in messages:
+                row: dict[str, Any] = {
+                    "ts": _now(),
+                    "role": msg["role"],
+                    "content": msg["content"]
+                }
+                f.write(json.dumps(row, ensure_ascii = False) + "\n")

@@ -36,10 +36,21 @@ class LlmConfig:
     default_model: str = _DEFAULT_MODEL
     router: str = "static"
 
+@dataclass
 class TraceConfig:
     enabled: bool = True
     file: str = _DEFAULT_TRACE_FILE
     include_llm_payload: bool = True
+
+@dataclass
+class PermissionConfig:
+    timeout_s: float = 60.0
+
+@dataclass
+class CompactionConfig:
+    auto_threshold: float = 0.0
+    tool_result_limit: int = 8_000
+    tool_result_keep: int = 4_000
 
 @dataclass
 class AgentConfig:
@@ -49,6 +60,8 @@ class AgentConfig:
     loop: LoopConfig = field(default_factory = LoopConfig)
     llm: LlmConfig = field(default_factory = LlmConfig)
     trace: TraceConfig = field(default_factory = TraceConfig)
+    permission: PermissionConfig = field(default_factory = PermissionConfig)
+    compaction: CompactionConfig = field(default_factory = CompactionConfig)
 
 # 从config.toml中读取config
 def get_config() -> AgentConfig:
@@ -173,6 +186,43 @@ def _apply_toml(
                 raise SystemExit("Config error: trace.include_llm_payload must be a boolean")
             config.trace.include_llm_payload = val
 
+    if "permission" in data:
+        perm = data["permission"]
+        if not isinstance(perm, dict):
+            raise SystemExit("Config error: [permission] must be a table")
+        unknown_perm: set[str] = set(perm.keys()) - {"timeout_s"}
+        if unknown_perm:
+            raise SystemExit(f"Unknown [permission] keys: {', '.join(sorted(unknown_perm))}")
+        if "timeout_s" in perm:
+            val = perm["timeout_s"]
+            if not isinstance(val, (int, float)) or val < 0:
+                raise SystemExit("Config error: permission.timeout_s must be a non-negative number")
+            config.permission.timeout_s = float(val)
+    
+    if "compaction" in data:
+        comp = data["compaction"]
+        if not isinstance(comp, dict):
+            raise SystemExit("Config error: [compaction] must be a table")
+        unknown_comp: set[str] = set(comp.keys()) - {"auto_threshold", "tool_result_limit", "tool_result_keep"}
+        if unknown_comp:
+            raise SystemExit(f"Unknown [compaction] keys: {', '.join(sorted(unknown_comp))}")
+        if "auto_threshold" in comp:
+            val = comp["auto_threshold"]
+            if not isinstance(val, (int, float)) or not (0.0 <= val <= 1.0):
+                raise SystemExit("Config error: compaction.auto_threshold must be between 0 and 1")
+            config.compaction.auto_threshold = float(val)
+        if "tool_result_limit" in comp:
+            val = comp["tool_result_limit"]
+            if not isinstance(val, int) or val <= 0:
+                raise SystemExit("Config error: compaction.tool_result_limit must be a positive integer")
+            config.compaction.tool_result_limit = val
+        if "tool_result_keep" in comp:
+            val = comp["tool_result_keep"]
+            if not isinstance(val, int) or val <= 0:
+                raise SystemExit("Config error: compaction.tool_result_keep must be a positive integer")
+            config.compaction.tool_result_keep = val
+
+
 # 优先环境变量，如果有就用环境变量
 def _apply_env(config: AgentConfig) -> None:
     host = os.environ.get("AGENT_HOST")
@@ -229,3 +279,60 @@ def _apply_env(config: AgentConfig) -> None:
     trace_payload = os.environ.get("AGENT_TRACE_INCLUDE_LLM_PAYLOAD")
     if trace_payload is not None:
         config.trace.include_llm_payload = trace_payload.lower() not in ("0", "false", "no")
+
+    perm_timeout = os.environ.get("AGENT_PERMISSION_TIMEOUT_S")
+    if perm_timeout is not None:
+        try:
+            val = float(perm_timeout)
+            if val < 0:
+                raise SystemExit(
+                    f"Config error: AGENT_PERMISSION_TIMEOUT_S must be >= 0, got: {perm_timeout!r}"
+                )
+            config.permission.timeout_s = val
+        except ValueError:
+            raise SystemExit(
+                f"Config error: AGENT_PERMISSION_TIMEOUT_S must be a number, got: {perm_timeout!r}"
+            )
+
+    compact_threshold = os.environ.get("AGENT_COMPACT_THRESHOLD")
+    if compact_threshold is not None:
+        try:
+            compact_threshold_val = float(compact_threshold)
+            if not (0.0 <= compact_threshold_val <= 1.0):
+                raise SystemExit(
+                    f"Config error: AGENT_COMPACT_THRESHOLD must be between 0 and 1, got: {compact_threshold!r}"
+                )
+            config.compaction.auto_threshold = compact_threshold_val
+        except ValueError:
+            raise SystemExit(
+                f"Config error: AGENT_COMPACT_THRESHOLD must be a number, got: {compact_threshold!r}"
+            )
+
+    compact_tool_limit = os.environ.get("AGENT_COMPACT_TOOL_LIMIT")
+    if compact_tool_limit is not None:
+        try:
+            compact_tool_limit_val = int(compact_tool_limit)
+            if compact_tool_limit_val <= 0:
+                raise SystemExit(
+                    f"Config error: AGENT_COMPACT_TOOL_LIMIT must be a positive integer, got: {compact_tool_limit!r}"
+                )
+            config.compaction.tool_result_limit = compact_tool_limit_val
+        except ValueError:
+            raise SystemExit(
+                f"Config error: AGENT_COMPACT_TOOL_LIMIT must be an integer, got: {compact_tool_limit!r}"
+            )
+
+
+    compact_tool_keep = os.environ.get("AGENT_COMPACT_TOOL_KEEP")
+    if compact_tool_keep is not None:
+        try:
+            compact_tool_keep_val = int(compact_tool_keep)
+            if compact_tool_keep_val <= 0:
+                raise SystemExit(
+                    f"Config error: AGENT_COMPACT_TOOL_KEEP must be a positive integer, got: {compact_tool_keep!r}"
+                )
+            config.compaction.tool_result_keep = compact_tool_keep_val
+        except ValueError:
+            raise SystemExit(
+                f"Config error: AGENT_COMPACT_TOOL_KEEP must be an integer, got: {compact_tool_keep!r}"
+            )

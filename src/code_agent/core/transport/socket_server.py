@@ -98,7 +98,7 @@ class SocketServer:
 
             try:
                 await asyncio.wait_for(writer.wait_closed(), timeout = 1.0)
-            except TimeoutError:
+            except (ConnectionResetError, TimeoutError):
                 pass
             logger.debug("client disconnected: %s", addr)
 
@@ -168,11 +168,19 @@ class SocketServer:
             return
         except Exception as e:
             logger.exception("handler %s raised %s", request.method, e)
-            await self._send(writer, make_error(request.id, INTERNAL_ERROR, "Internal error"))
+
+            await self._send(
+                writer, 
+                make_error(request.id, INTERNAL_ERROR, "Internal error")
+            )
+
             return 
         
         result_data: Any = result.model_dump() if isinstance(result, BaseModel) else result
-        await self._send(writer, JsonRpcSuccess(id = request.id, result = result_data))
+        await self._send(
+            writer,
+            JsonRpcSuccess(id = request.id, result = result_data)
+        )
 
     async def _send(
         self,

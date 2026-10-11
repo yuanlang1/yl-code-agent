@@ -4,11 +4,15 @@ import asyncio
 from datetime import UTC, datetime
 from typing import Any, Callable
 import uuid
+from code_agent.core.bus.commands import SessionCompactResult
 from code_agent.core.bus.envelope import HandlerError
 from code_agent.core.bus.events import SessionClosedEvent, SessionCreatedEvent, SessionMessageReceivedEvent, SessionResumedEvent, SessionWaitingForInputEvent
+from code_agent.core.compact.compactor import Compactor
 from code_agent.core.events.bus import EventBus
+from code_agent.core.llm import provider
+from code_agent.core.llm.base import LlmProvider
 from code_agent.core.runner import AgentRunner
-from code_agent.core.runs import new_run_id
+from code_agent.core.runs import new_run_id, session_dir
 from code_agent.core.session.model import Session, SessionMode
 from code_agent.core.session.store import SessionStore
 
@@ -24,13 +28,15 @@ class SessionManager:
         self,
         store: SessionStore,
         runner_factory: Callable[[], AgentRunner],
-        bus: EventBus    
+        bus: EventBus,
+        provider: LlmProvider | None = None
     ) -> None:
         self._store = store
         self._runner_factory = runner_factory
         self._bus = bus
         self._sessions: dict[str, Session] = {}
         self._lock: dict[str, asyncio.Lock] = {}
+        self._provider = provider
 
     async def create(
         self,
@@ -167,5 +173,42 @@ class SessionManager:
     ) -> list[dict[str, Any]]:
         session = self._get_session(session_id)
         return self._store.read_messages(session_id)
+
+    async def compact(
+        self,
+        session_id: str,
+        focus: str = ""
+    ) -> Any:
+        session = self._sessions.get(session_id)
+        lock = self._lock[session_id]
+        if lock.locked():
+            raise HandlerError(SESSION_BUSY, "session busy")
+        
+        if self._provider is None:
+            raise HandlerError(-32020, "provider not available for compaction.")
+
+        async with lock:
+            messages = self._store.read_messages(session_id)
+            session_dir = self._store.session_dir(session_id)
+            compactor = Compactor(self._bus, session_dir, session_id)
+
+            result = await compactor.compact_messages(messages, provider, focus)
+            if result is None:
+                raise HandlerError(-32020, "compaction failed or not beneficial")
+
+            self._store.write_compacted(
+                session_id = session.id,
+                messages = [
+                    {"role": "user", "content": result.summary_text},
+                    {"role": "assistant", "content": "Understood, I'll continue from this summary"}
+                ]
+            )
+
+            return SessionCompactResult(
+                summary_tokens = result.original_token_estimate,
+                saved_tokens = max(0, result.original_token_estimate - result.summary_tokens)
+            )
+
+    
 
                     

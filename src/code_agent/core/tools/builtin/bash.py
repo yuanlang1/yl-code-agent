@@ -44,7 +44,8 @@ class BashTool(BaseTool):
 
             try:
                 stdout_bytes, _ = await asyncio.wait_for(
-                    proc.communicate(), timeout = timeout
+                    proc.communicate(),
+                    timeout = timeout
                 )
             except TimeoutError:
                 proc.kill()

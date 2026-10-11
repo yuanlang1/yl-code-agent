@@ -68,12 +68,13 @@ class LlmTokenEvent(BaseModel):
     ts: str
 
 class LlmUsageEvent(BaseModel):
-    type: Literal["llm_usage"] = "llm_usage"
+    type: Literal["llm.usage"] = "llm.usage"
     run_id: str
     input_tokens: int
     output_tokens: int
     cache_read_input_tokens: int
     cache_creation_input_tokens: int
+    context_pct: float = 0.0
     ts: str
 
 class LlmModelSelectedEvent(BaseModel):
@@ -117,6 +118,40 @@ class SessionWaitingForInputEvent(BaseModel):
     type: Literal["session.waiting_for_input"] = "session.waiting_for_input"
     session_id: str
     last_run_id: str
+    ts: str
+
+class PermissionRequestedEvent(BaseModel):
+    type: Literal["permission.requested"] = "permission.requested"
+    run_id: str
+    tool_use_id: str
+    tool_name: str
+    params: dict[str, Any]
+    param_preview: str
+    session_id: str
+    ts: str
+ 
+class PermissionGrantedEvent(BaseModel):
+    type: Literal["permission.granted"] = "permission.granted"
+    run_id: str
+    tool_use_id: str
+    # "allow_once" | "always_allow" | "auto_allow"
+    decision: str
+    ts: str
+
+class PermissionDeniedEvent(BaseModel):
+    type: Literal["permission.denied"] = "permission.denied"
+    run_id: str
+    tool_use_id: str
+    # "deny_once" | "always_deny" | "auto_deny"
+    decision: str
+    ts: str
+
+class ContextCompactedEvent(BaseModel):
+    type: Literal["context.compacted"] = "context.compacted"
+    session_id: str
+    run_id: str
+    original_tokens: int
+    summary_tokens: int
     ts: str
 
 # 根据 type 字段决定事件类型的判别联合

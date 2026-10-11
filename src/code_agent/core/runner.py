@@ -4,8 +4,10 @@ from asyncio import CancelledError
 import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import logging
 from pathlib import Path
 from code_agent.core.bus.events import RunFinishedEvent, RunStartedEvent
+from code_agent.core.compact.compactor import Compactor
 from code_agent.core.config import AgentConfig
 from code_agent.core.context import ExecutionContext
 from code_agent.core.events.bus import EventBus, EventHandler
@@ -13,6 +15,8 @@ from code_agent.core.events.writer import EventWriter
 from code_agent.core.llm.base import LlmProvider
 from code_agent.core.llm.provider import AnthropicProvider
 from code_agent.core.loop import AgentLoop
+from code_agent.core.memory.loader import load_context_file
+from code_agent.core.permissions.manager import PermissionManager
 from code_agent.core.runs import RUNS_DIR, new_run_id
 from code_agent.core.session.model import Session
 from code_agent.core.session.store import SessionStore
@@ -30,6 +34,8 @@ from code_agent.core.tools.builtin.write_file import WriteFileTool
 from code_agent.core.tools.registry import ToolRegistry
 from code_agent.core.trace.provider import TracingProvider
 from code_agent.core.trace.writer import TraceWriter
+
+logger = logging.getLogger(__name__)
 
 def _now() -> str:
     return datetime.now(UTC).isoformat()
@@ -49,7 +55,8 @@ class AgentRunner:
         extra_handler: list[EventHandler] | None = None,
         runs_dir: Path | None = None,
         bus: EventBus | None = None,
-        trace: TraceWriter | None = None
+        trace: TraceWriter | None = None,
+        permission_manager: PermissionManager | None = None
     ) -> None:
         self._config = config
         self._provider = provider
@@ -57,6 +64,7 @@ class AgentRunner:
         self._extra_handler: list[EventHandler] = extra_handler or []
         self._runs_dir = runs_dir or RUNS_DIR
         self._trace = trace
+        self._permission_manager = permission_manager
 
     def _build_registry(
         self,
@@ -114,7 +122,9 @@ class AgentRunner:
             notes = ""
 
         run_path.mkdir(parents = True, exist_ok = True)
-        
+        global_ctx = load_context_file(Path("~/.agent/context.md").expanduser())
+        project_ctx = load_context_file(Path(".agent/context.md"))
+
         task_manager = TaskManager(run_path / ".tasks")
 
         bus = self._bus if self._bus is not None else EventBus()
@@ -126,7 +136,9 @@ class AgentRunner:
             goal = goal,
             max_steps = self._config.loop.max_steps,
             prefill_messages = history,
-            session_notes = notes
+            session_notes = notes,
+            global_context = global_ctx,
+            project_context = project_ctx
         )
 
         prefill_len = len(history)
@@ -149,13 +161,30 @@ class AgentRunner:
                         include_payload = self._config.trace.include_llm_payload
                     )
 
-                loop = AgentLoop(provider, bus, registry)
+                session_dir = store.session_dir(session.id) if session is not None and store is not None else run_path
+                session_id_str = session.id if session is not None else ""
+                compactor = Compactor(bus, session_dir, session_id_str)
+
+                loop = AgentLoop(
+                    provider = provider, 
+                    bus = bus, 
+                    registry = registry,
+                    permission_manager = self._permission_manager,
+                    session_id = session.id if session is not None else "",
+                    compactor = compactor,
+                    compact_threshold = self._config.compaction.auto_threshold
+                )
+
                 await loop.run(context)
             except CancelledError:
                 cancelled = True
                 if not context.is_done():
                     context.mark_failed("cancelled")
             except Exception:
+                logger.exception(
+                    "agent run failed run_id=%s step=%d", run_id, context.step
+                )
+                
                 if not context.is_done():
                     context.mark_failed("llm_error")
 

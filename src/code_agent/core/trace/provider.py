@@ -32,7 +32,8 @@ class TracingProvider:
         bus: EventBus,
         run_id: str,
         *,
-        step: int = 0
+        step: int = 0,
+        system: str | None = None
     ) -> LlmResponse:
         if self._include_payload:
             call_data = {
@@ -63,7 +64,8 @@ class TracingProvider:
             tool_schemas = tool_schemas,
             bus = bus,
             run_id = run_id,
-            step = step
+            step = step,
+            system = system
         )
         latency_ms = int((time.monotonic() - start_time) * 1000)
 

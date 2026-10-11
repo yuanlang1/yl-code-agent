@@ -1,8 +1,11 @@
+from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
 import uuid
 
+_PROJECT_DIR = Path(__file__).resolve().parents[3]
+_AGENT_DIR =  _PROJECT_DIR / ".agent"
 RUNS_DIR = Path("runs")
 SESSION_DIR = Path("sessions")
 
@@ -12,6 +15,12 @@ def run_dir(run_id: str) -> Path:
 
 def session_dir() -> Path:
     return SESSION_DIR
+
+def policy_dir() -> Path:
+    return _AGENT_DIR / "policy.toml"
+
+def dir() -> Path:
+    return _PROJECT_DIR
 
 # 返回指定 run_id 的事件日志文件路径
 def events_file(run_id: str) -> Path:
