@@ -20,6 +20,7 @@ from code_agent.core.config import AgentConfig, get_config
 from code_agent.core.events.bus import EventBus
 from code_agent.core.llm.provider import AnthropicProvider
 from code_agent.core.logging_setup import setup_logging
+from code_agent.core.mcp import McpServerManager
 from code_agent.core.permissions import load_policy_file
 from code_agent.core.permissions.manager import PermissionManager
 from code_agent.core.runner import AgentRunner
@@ -48,6 +49,7 @@ class CoreApp:
         self._running_runs: set[asyncio.Task[None]] = set[asyncio.Task[None]]()
         self._sessions: SessionManager | None = None
         self._permission_manager: PermissionManager | None = None
+        self._mcp_manager: McpServerManager | None = None
 
     async def _ping_handler(
         self,
@@ -264,6 +266,12 @@ class CoreApp:
         session_root = Path(session_dir()).expanduser()
         store = SessionStore(session_root)
         compact_provider = AnthropicProvider(self._config.llm.default_model)
+
+        self._mcp_manager = McpServerManager()
+        if self._config.mcp.servers:
+            logger.info("mcp: starting %d server(s)", len(self._config.mcp.servers))
+            await self._mcp_manager.start_all(self._config.mcp.servers)
+
         self._sessions = SessionManager(
             store = store,
             runner_factory = lambda: AgentRunner(
@@ -271,6 +279,7 @@ class CoreApp:
                 bus = self._bus, 
                 trace = self._trace,
                 permission_manager = self._permission_manager,
+                mcp_manager = self._mcp_manager
             ),
             bus = self._bus,
             provider = compact_provider

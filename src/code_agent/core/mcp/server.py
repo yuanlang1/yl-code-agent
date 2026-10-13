@@ -21,7 +21,7 @@ class McpServerManager:
         for cfg in servers:
             try:
                 client = await self._connect(cfg)
-                tool_defs = client.list_tools()
+                tool_defs = await client.list_tools()
                 for tool_def in tool_defs:
                     self._tools.append(
                         McpTool(client, cfg.name, tool_def)

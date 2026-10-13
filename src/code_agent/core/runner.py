@@ -15,6 +15,7 @@ from code_agent.core.events.writer import EventWriter
 from code_agent.core.llm.base import LlmProvider
 from code_agent.core.llm.provider import AnthropicProvider
 from code_agent.core.loop import AgentLoop
+from code_agent.core.mcp import McpServerManager
 from code_agent.core.memory.loader import load_context_file
 from code_agent.core.permissions.manager import PermissionManager
 from code_agent.core.runs import RUNS_DIR, new_run_id
@@ -60,6 +61,7 @@ class AgentRunner:
         bus: EventBus | None = None,
         trace: TraceWriter | None = None,
         permission_manager: PermissionManager | None = None,
+        mcp_manager: McpServerManager | None = None
     ) -> None:
         self._config = config
         self._provider = provider
@@ -68,6 +70,7 @@ class AgentRunner:
         self._runs_dir = runs_dir or RUNS_DIR
         self._trace = trace
         self._permission_manager = permission_manager
+        self._mcp_manager = mcp_manager
         self._task_registry = BackgroundTaskRegistry()
 
     def _build_registry(
@@ -130,6 +133,12 @@ class AgentRunner:
                         task_registry = self._task_registry
                     )
                 )
+
+        # add mcp tool
+        if self._mcp_manager is not None:
+            for mcp_tool in self._mcp_manager.get_tools():
+                if _ok(mcp_tool.name):
+                    registry.register(mcp_tool)
 
         return registry
 

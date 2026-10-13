@@ -45,7 +45,7 @@ class McpClient:
 
         self._proc = await asyncio.create_subprocess_exec(
             command, 
-            args,
+            *args,
             stdin = asyncio.subprocess.PIPE,
             stdout = asyncio.subprocess.PIPE,
             stderr = asyncio.subprocess.PIPE,
@@ -55,7 +55,7 @@ class McpClient:
         self._reader = self._proc.stdout
         self._writer = self._proc.stdin
         self._transport = "stdio"
-        self._stderr_task = asyncio.create_task(self._drain_stderr(self._drain_stderr()))
+        self._stderr_task = asyncio.create_task(self._drain_stderr())
 
         # initialize
         await self._initialize()
@@ -95,7 +95,7 @@ class McpClient:
             params = {}
         )
 
-        tools: list[McpClient] = []
+        tools: list[McpToolDef] = []
         for t in response.get("tools", []):
             tools.append(
                 McpToolDef(
@@ -142,7 +142,7 @@ class McpClient:
         }
         
         async with self._lock:
-            await self._write_line(request)
+            await self._write_line(json.dumps(request))
             
             while True:
                 line = await self._read_line()

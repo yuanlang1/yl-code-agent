@@ -64,6 +64,7 @@ class McpServerConfig:
     host: str = "localhost"
     port: int = 3000
 
+@dataclass
 class McpConfig:
     servers: list[McpServerConfig] = field(default_factory = list)
 
@@ -102,7 +103,7 @@ def _apply_toml(
     config: AgentConfig,
     data: dict[str, Any]
 ) -> None:
-    unknown = set(data.keys()) - {"core", "logging"}
+    unknown = set(data.keys()) - {"core", "logging", "loop", "llm", "trace", "permission", "compaction", "mcp"}
     if unknown:
         raise SystemExit(f"Unknown top-level config keys: {', '.join(sorted(unknown))}")
 

@@ -6,8 +6,12 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 runs/
-log/
 scripts/
 .vscode/
 .agent/
 tests/
+sessions/
+logs/
+sessions/
+*.log
+*.log.*
