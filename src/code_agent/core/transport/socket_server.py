@@ -117,7 +117,7 @@ class SocketServer:
             if not line:
                 return
 
-            await self._handle_line(line, writer)
+            asyncio.create_task(self._handle_line(line, writer))
     
     async def _handle_line(
         self,

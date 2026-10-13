@@ -15,6 +15,7 @@ from code_agent.core.tools.registry import ToolRegistry
 
 _MAX_RETRIES = 2
 _RETRY_BASE_S = 2.0
+_DEFAULT_TIMEOUT = 120.0
 _RETRYABLE = ["runtime_error", "rate_limited"]
 
 def _now() -> str:
@@ -54,7 +55,7 @@ async def invoke_tool(
     tool_call: ToolCallBack,
     bus: EventBus,
     run_id: str,
-    timeout: float = 10.0,
+    timeout: float = _DEFAULT_TIMEOUT,
     *,
     permission_manager: PermissionManager | None = None,
     session_id: str = ""
@@ -77,7 +78,8 @@ async def invoke_tool(
     tool = registry.get(tool_call.name)
     if tool is None:
         return await _fail(bus, run_id, tool_call,
-            "runtime_error", f"unknown tool: {tool_call.name}",  elapsed())
+            "runtime_error", f"unknown tool: {tool_call.name}",  elapsed()
+        )
     
     if tool.params_model is not None:
         try:
@@ -138,7 +140,7 @@ async def invoke_tool(
                 elapsed_ms = elapsed()
             )
 
-    for attempt in (1, _MAX_RETRIES + 2):
+    for attempt in range(1, _MAX_RETRIES + 2):
         try:
             result = await asyncio.wait_for(
                 tool.invoke(tool_call.input), timeout = timeout
@@ -173,7 +175,7 @@ async def invoke_tool(
             error_class = "runtime_error"
             error_message = str(e)
 
-        if attempt <= _MAX_RETRIES or error_class in _RETRYABLE:
+        if attempt <= _MAX_RETRIES and error_class in _RETRYABLE:
             await bus.publish(
                 ToolCallFailedEvent(
                     run_id = run_id,
@@ -201,7 +203,7 @@ async def invoke_tool(
         )
 
     return ToolResult(
-        content = "internal error",
+        content = "internal error111",
         is_error = True,
         error_type = "runtime_error"
     )

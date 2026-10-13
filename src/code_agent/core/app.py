@@ -148,7 +148,7 @@ class CoreApp:
         params: dict[str, Any]
     ) -> SessionCompactResult:
         assert self._sessions is not None
-
+        
         cmd = SessionCompactCommand.model_validate(params)
         result = await self._sessions.compact(cmd.session_id, cmd.focus)
 
@@ -270,7 +270,7 @@ class CoreApp:
                 config = self._config, 
                 bus = self._bus, 
                 trace = self._trace,
-                permission_manager = self._permission_manager
+                permission_manager = self._permission_manager,
             ),
             bus = self._bus,
             provider = compact_provider

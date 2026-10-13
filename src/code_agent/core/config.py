@@ -7,6 +7,8 @@ import tomllib
 from typing import Any
 from dotenv import load_dotenv
 
+from code_agent.core import transport
+
 # 根目录下
 _PROJECT_DIR = Path(__file__).resolve().parents[3]
 _AGENT_DIR =  _PROJECT_DIR / ".agent"
@@ -53,6 +55,19 @@ class CompactionConfig:
     tool_result_keep: int = 4_000
 
 @dataclass
+class McpServerConfig:
+    name: str
+    transport: str = "stdio"
+    command: str = ""
+    args: list[str] = field(default_factory = list)
+    env: dict[str, str] = field(default_factory = dict)
+    host: str = "localhost"
+    port: int = 3000
+
+class McpConfig:
+    servers: list[McpServerConfig] = field(default_factory = list)
+
+@dataclass
 class AgentConfig:
     host: str = _DEFAULT_HOST
     port: str = _DEFAULT_PORT
@@ -62,6 +77,7 @@ class AgentConfig:
     trace: TraceConfig = field(default_factory = TraceConfig)
     permission: PermissionConfig = field(default_factory = PermissionConfig)
     compaction: CompactionConfig = field(default_factory = CompactionConfig)
+    mcp: McpConfig = field(default_factory = McpConfig)
 
 # 从config.toml中读取config
 def get_config() -> AgentConfig:
@@ -221,6 +237,53 @@ def _apply_toml(
             if not isinstance(val, int) or val <= 0:
                 raise SystemExit("Config error: compaction.tool_result_keep must be a positive integer")
             config.compaction.tool_result_keep = val
+
+    if "mcp" in data:
+        mcp = data["mcp"]
+        if not isinstance(mcp, dict):
+            raise SystemExit("Config error: [mcp] must be a table")
+        unknown_mcp: set[str] = set(mcp.keys()) - {"servers"}
+        if unknown_mcp:
+            raise SystemExit(f"Unknown [mcp] keys: {', '.join(sorted(unknown_mcp))}")
+        servers_raw = mcp.get("servers", [])
+        if not isinstance(servers_raw, list):
+            raise SystemExit("Config error: mcp.servers must be an array of tables")
+        for i, srv in enumerate(servers_raw):
+            if not isinstance(srv, dict):
+                raise SystemExit(f"Config error: mcp.servers[{i}] must be a table")
+            name = srv.get("name")
+            if not isinstance(name, str) or not name:
+                raise SystemExit(f"Config error: mcp.servers[{i}].name must be a non-empty string")
+            transport = srv.get("transport", "stdio")
+            if transport not in ("stdio", "tcp"):
+                raise SystemExit(f"Config error: mcp.servers[{i}].transport must be 'stdio' or 'tcp'")
+            s = McpServerConfig(name=name, transport=transport)
+            if "command" in srv:
+                val = srv["command"]
+                if not isinstance(val, str):
+                    raise SystemExit(f"Config error: mcp.servers[{i}].command must be a string")
+                s.command = val
+            if "args" in srv:
+                val = srv["args"]
+                if not isinstance(val, list):
+                    raise SystemExit(f"Config error: mcp.servers[{i}].args must be an array")
+                s.args = [str(a) for a in val]
+            if "env" in srv:
+                val = srv["env"]
+                if not isinstance(val, dict):
+                    raise SystemExit(f"Config error: mcp.servers[{i}].env must be a table")
+                s.env = {str(k): str(v) for k, v in val.items()}
+            if "host" in srv:
+                val = srv["host"]
+                if not isinstance(val, str):
+                    raise SystemExit(f"Config error: mcp.servers[{i}].host must be a string")
+                s.host = val
+            if "port" in srv:
+                val = srv["port"]
+                if not isinstance(val, int):
+                    raise SystemExit(f"Config error: mcp.servers[{i}].port must be an integer")
+                s.port = val
+            config.mcp.servers.append(s)
 
 
 # 优先环境变量，如果有就用环境变量

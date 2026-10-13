@@ -20,6 +20,9 @@ from code_agent.core.permissions.manager import PermissionManager
 from code_agent.core.runs import RUNS_DIR, new_run_id
 from code_agent.core.session.model import Session
 from code_agent.core.session.store import SessionStore
+from code_agent.core.subagent.registry import BackgroundTaskRegistry
+from code_agent.core.subagent.tools.agent_result import AgentResultTool
+from code_agent.core.subagent.tools.swapn_agent import SpawnAgentTool
 from code_agent.core.task import TaskManager
 from code_agent.core.tools.builtin.bash import BashTool
 from code_agent.core.tools.builtin.environment_info import EnvironmentInfoTool
@@ -56,7 +59,7 @@ class AgentRunner:
         runs_dir: Path | None = None,
         bus: EventBus | None = None,
         trace: TraceWriter | None = None,
-        permission_manager: PermissionManager | None = None
+        permission_manager: PermissionManager | None = None,
     ) -> None:
         self._config = config
         self._provider = provider
@@ -65,27 +68,69 @@ class AgentRunner:
         self._runs_dir = runs_dir or RUNS_DIR
         self._trace = trace
         self._permission_manager = permission_manager
+        self._task_registry = BackgroundTaskRegistry()
 
     def _build_registry(
         self,
         task_manager: TaskManager,
+        *,
         session: Session | None = None,
         store: SessionStore | None = None,
-        run_id: str | None = None
-    ) -> ToolRegistry:
+        run_id: str | None = None,
+        provider: LlmProvider | None = None,
+        bus: EventBus | None = None,
+        child_run_dir: Path | None = None,
+        session_id: str = "",
+        tool_whitelist: list[str] | None = None
+    ) -> ToolRegistry: 
+        allowed: set[str] | None = set(tool_whitelist) if tool_whitelist else None
+        def _ok(name: str) -> bool:
+            return allowed is None or name in allowed
+
         registry = ToolRegistry()
-        registry.register(ReadFileTool())
-        registry.register(BashTool())
-        registry.register(WriteFileTool())
-        registry.register(ListDirTool())
-        registry.register(EnvironmentInfoTool())
-        registry.register(TaskCreateTool(task_manager))
-        registry.register(TaskUpdateTool(task_manager))
-        registry.register(TaskListTool(task_manager))
-        registry.register(TaskGetTool(task_manager))
+        
+        for t in [ReadFileTool(), BashTool(), WriteFileTool(), ReadFileTool()]:
+            if _ok(t.name):
+                registry.register(t)
+        
+        for t in [
+            TaskCreateTool(task_manager), 
+            TaskUpdateTool(task_manager),
+            TaskListTool(task_manager),
+            TaskGetTool(task_manager)
+        ]:
+            if _ok(t.name):
+                registry.register(t)
 
         if session is not None and store is not None and run_id is not None:
-            return registry.register(NoteSaveTool(store, session.id, run_id))
+            note_tool = NoteSaveTool(store, session.id, run_id)
+            if _ok(note_tool.name):
+                registry.register(note_tool)
+
+        if provider is not None and bus is not None and run_id is not None:
+            runs_dir = child_run_dir or self._runs_dir
+            if _ok("spawn_agent"):
+                registry.register(
+                    SpawnAgentTool(
+                        provider = provider,
+                        parent_bus = bus,
+                        parent_run_id = run_id,
+                        permission_manager = self._permission_manager,
+                        max_steps = self._config.loop.max_steps,
+                        task_registry = self._task_registry,
+                        runs_dir = runs_dir,
+                        session_id = session_id,
+                        depth = 0
+                    )
+                )
+        
+            if _ok("agent_result"):
+                registry.register(
+                    AgentResultTool(
+                        task_registry = self._task_registry
+                    )
+                )
+
         return registry
 
     async def run(
@@ -108,7 +153,9 @@ class AgentRunner:
         goal: str,
         run_id: str | None = None,
         session: Session | None = None,
-        store: SessionStore | None = None
+        store: SessionStore | None = None,
+        system_prompt_override: str | None = None,
+        tool_whitelist: list[str] | None = None
     ) -> RunOutcome:
         run_id = run_id or new_run_id()
 
@@ -138,7 +185,8 @@ class AgentRunner:
             prefill_messages = history,
             session_notes = notes,
             global_context = global_ctx,
-            project_context = project_ctx
+            project_context = project_ctx,
+            system_prompt_override = system_prompt_override
         )
 
         prefill_len = len(history)
@@ -149,7 +197,6 @@ class AgentRunner:
             await bus.publish(
                 RunStartedEvent(run_id = run_id, goal = goal, ts = _now())
             )
-            registry = self._build_registry(task_manager)
 
             cancelled = False
             try:
@@ -161,8 +208,30 @@ class AgentRunner:
                         include_payload = self._config.trace.include_llm_payload
                     )
 
-                session_dir = store.session_dir(session.id) if session is not None and store is not None else run_path
+                session_dir = (
+                    store.session_dir(session.id)
+                    if session is not None and store is not None 
+                    else run_path
+                )
                 session_id_str = session.id if session is not None else ""
+                child_run_dir = (
+                    store.runs_dir(session.id)
+                    if session is not None and store is not None
+                    else self._runs_dir
+                )
+
+                registry = self._build_registry(
+                    task_manager = task_manager,
+                    session = session,
+                    store = store,
+                    run_id = run_id,
+                    provider = provider,
+                    bus = bus,
+                    child_run_dir = child_run_dir,
+                    session_id = session_id_str,
+                    tool_whitelist = tool_whitelist
+                )
+
                 compactor = Compactor(bus, session_dir, session_id_str)
 
                 loop = AgentLoop(

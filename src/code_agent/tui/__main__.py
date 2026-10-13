@@ -1,12 +1,39 @@
 from __future__ import annotations
 
 import argparse
+import os
+import logging
+import logging.handlers
+from pathlib import Path
 
 from code_agent.core.config import get_config
 from code_agent.tui.app import AgentTuiApp
 
+_PROJECT_DIR = Path(__file__).resolve().parents[3]
+_AGENT_DIR =  _PROJECT_DIR / ".agent"
+_DEFAULT_TUI_LOG = _AGENT_DIR / "logs/tui.log"
 
-# tui 入口：解析 --replay 参数后启动 TUI 应用
+
+# TUI 文件日志初始化：不写 stderr（避免干扰 Textual 渲染），只写滚动文件
+def _setup_logging(level: str) -> None:
+    log_path = Path(os.environ.get("KAMA_TUI_LOG_FILE", _DEFAULT_TUI_LOG)).expanduser()
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.handlers.RotatingFileHandler(
+        log_path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    handler.setFormatter(
+        logging.Formatter(
+            'level=%(levelname)s ts=%(asctime)s source=%(name)s msg="%(message)s"',
+            datefmt="%Y-%m-%dT%H:%M:%S",
+        )
+    )
+    root = logging.getLogger()
+    root.setLevel(getattr(logging, level.upper(), logging.DEBUG))
+    root.handlers.clear()
+    root.addHandler(handler)
+
+
+# kama-tui 入口：解析 --replay 参数后启动 TUI 应用
 def main() -> None:
     parser = argparse.ArgumentParser(prog="agent-tui", description="Agent TUI")
     parser.add_argument(
@@ -17,9 +44,11 @@ def main() -> None:
     args = parser.parse_args()
 
     config = get_config()
+    _setup_logging(config.logging.level)
     app = AgentTuiApp(config.host, config.port, replay_run_id=args.replay)
     app.run()
 
 
 if __name__ == "__main__":
     main()
+

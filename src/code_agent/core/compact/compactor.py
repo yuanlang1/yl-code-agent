@@ -125,13 +125,13 @@ class Compactor:
         if focus.strip():
             prompt += f"\n\nIMPORTANT: Pay special attention to: {focus.strip()}"
 
-        compress_request: list[dict[str, Any]] = {
+        compress_request: list[dict[str, Any]] = [{
             "role": "user", 
             "content": f"{prompt}\n\n---\n\n{history_text}"
-        }
+        }]
         
         try:
-            silent_bus = _Bus
+            silent_bus = _Bus()
             response = await provider.chat(
                 messages = compress_request,
                 tool_schemas = [],

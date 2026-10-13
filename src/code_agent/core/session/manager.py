@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from ast import arguments
 import asyncio
 from datetime import UTC, datetime
 from typing import Any, Callable
 import uuid
 from code_agent.core.bus.commands import SessionCompactResult
 from code_agent.core.bus.envelope import HandlerError
-from code_agent.core.bus.events import SessionClosedEvent, SessionCreatedEvent, SessionMessageReceivedEvent, SessionResumedEvent, SessionWaitingForInputEvent
+from code_agent.core.bus.events import SessionClosedEvent, SessionCreatedEvent, SessionMessageReceivedEvent, SessionResumedEvent, SessionWaitingForInputEvent, SkillInvokedEvent
 from code_agent.core.compact.compactor import Compactor
 from code_agent.core.events.bus import EventBus
 from code_agent.core.llm import provider
@@ -15,6 +16,7 @@ from code_agent.core.runner import AgentRunner
 from code_agent.core.runs import new_run_id, session_dir
 from code_agent.core.session.model import Session, SessionMode
 from code_agent.core.session.store import SessionStore
+from code_agent.core.skills import SkillLoader
 
 SESSION_NOT_FOUND = -32010
 SESSION_CLOSED = -32011
@@ -37,6 +39,7 @@ class SessionManager:
         self._sessions: dict[str, Session] = {}
         self._lock: dict[str, asyncio.Lock] = {}
         self._provider = provider
+        self._skill_loader = SkillLoader()
 
     async def create(
         self,
@@ -121,12 +124,38 @@ class SessionManager:
             session.updated_at = _now()
             self._store.write_meta(session)
 
+            goal = content
+            system_prompt_override: str | None = None
+            tool_whitelist: list[str] | None = None
+            if goal.startswith("/"):
+                parts = content[1:].split(None, 1)
+                skill_name = parts[0]
+                arguments = parts[1] if len(parts) > 1 else ""  
+                skill = self._skill_loader.resolve(skill_name)
+
+                if skill is not None:
+                    goal = self._skill_loader.render_prompt(skill, arguments)
+                    system_prompt_override = skill.system_prompt_template
+                    tool_whitelist = skill.allowed_tools or None
+
+                    await self._bus.publish(
+                        SkillInvokedEvent(
+                            skill_name = skill_name,
+                            arguments = arguments,
+                            run_id = run_id,
+                            ts = _now()
+                        )
+                    )
+
+
             runner = self._runner_factory()
             await runner.run_and_capture(
                 goal = content,
                 run_id = run_id,
                 session = session,
-                store = self._store
+                store = self._store,
+                system_prompt_override = system_prompt_override,
+                tool_whitelist = tool_whitelist
             )
             
             session.updated_at = _now()
@@ -192,7 +221,7 @@ class SessionManager:
             session_dir = self._store.session_dir(session_id)
             compactor = Compactor(self._bus, session_dir, session_id)
 
-            result = await compactor.compact_messages(messages, provider, focus)
+            result = await compactor.compact_messages(messages, self._provider, focus)
             if result is None:
                 raise HandlerError(-32020, "compaction failed or not beneficial")
 

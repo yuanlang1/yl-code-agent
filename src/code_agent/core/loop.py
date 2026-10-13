@@ -106,10 +106,10 @@ class AgentLoop:
             elif resp.stop_reason == "max_tokens" and resp.tool_calls:
                 for tc in resp.tool_calls:
                     context.add_tool_result(
-                        tc.id,
-                        "Error: output token limit reached before this tool call could be completed. "
-                        "Please break the task into smaller steps and try again.",
-                        is_error=True,
+                        tool_use_id = tc.id,
+                        content = "Error: output token limit reached before this tool call could be completed. "
+                                  "Please break the task into smaller steps and try again.",
+                        is_error = True,
                     )
 
             if resp.stop_reason == "end_turn":

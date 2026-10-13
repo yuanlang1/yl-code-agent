@@ -101,9 +101,7 @@ class PermissionManager:
             session_id = session_id,
             tool_name = tool_name
         )
-
-        logger.info("new pending permission: tool_use_id=%s", tool_use_id)
-
+        
         await event_emitter(
             {
                 "type": "permission.requested",
@@ -125,7 +123,7 @@ class PermissionManager:
             self._pending.pop(tool_use_id, None)
             logger.info("permission: timeout tool_use_id=%s tool=%s", tool_use_id, tool_name)
             return False, "timeout"
-
+        
         allowed = self._apply_response(raw, session_id, tool_name)
 
         return allowed, raw

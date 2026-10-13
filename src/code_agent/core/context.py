@@ -17,6 +17,7 @@ class ExecutionContext:
     status: str = "running"
     reason: str | None = None
     result: str = ""
+    system_prompt_override: str | None = None
 
     def __post_init__(self) -> None:
         if self.prefill_messages:
@@ -32,7 +33,8 @@ class ExecutionContext:
         self,
         base: str
     ) -> str:
-        parts = [base]
+        parts = [self.system_prompt_override if self.system_prompt_override else base]
+        
         if self.global_context.strip():
             parts.append("\n\n## Global Context\n" + self.global_context.strip())
         if self.project_context.strip():
